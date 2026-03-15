@@ -1,0 +1,2954 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+        <title>大学城美食地图</title>
+        <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+            background-color: #f5f5f5;
+            color: #333;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+        
+        .container {
+            flex: 1;
+            padding: 16px;
+            padding-bottom: 60px;
+        }
+        
+        .page {
+            display: none;
+        }
+        
+        .page.active {
+            display: block;
+        }
+        
+        .header {
+            background-color: #fff;
+            padding: 16px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+        
+        .header h1 {
+            font-size: 18px;
+            font-weight: 600;
+            text-align: center;
+        }
+        
+        .tab-bar {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            background-color: #fff;
+            display: flex;
+            justify-content: space-around;
+            align-items: center;
+            height: 56px;
+            box-shadow: 0 -2px 4px rgba(0,0,0,0.1);
+            z-index: 99;
+        }
+        
+        .tab-item {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            flex: 1;
+            cursor: pointer;
+            padding: 8px 0;
+        }
+        
+        .tab-item.active {
+            color: #ff6b6b;
+        }
+        
+        .tab-icon {
+            font-size: 20px;
+            margin-bottom: 4px;
+        }
+        
+        .tab-label {
+            font-size: 12px;
+        }
+        
+        .content {
+            padding: 16px 0;
+        }
+        
+        .section-title {
+            font-size: 16px;
+            font-weight: 600;
+            margin-bottom: 12px;
+        }
+        
+        /* 推荐页样式 */
+        .hero-section {
+            background: linear-gradient(135deg, #ff6b6b, #4ecdc4);
+            color: white;
+            padding: 24px;
+            border-radius: 12px;
+            margin-bottom: 20px;
+            text-align: center;
+        }
+        
+        .hero-section h2 {
+            font-size: 20px;
+            margin-bottom: 12px;
+        }
+        
+        .blind-box-btn {
+            background-color: white;
+            color: #ff6b6b;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 24px;
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+            margin-top: 8px;
+        }
+        
+        /* 排行榜页样式 */
+        .rank-tabs {
+            display: flex;
+            overflow-x: auto;
+            padding: 12px 0;
+            margin-bottom: 16px;
+            gap: 12px;
+        }
+        
+        .rank-tab {
+            background-color: #f0f0f0;
+            padding: 8px 16px;
+            border-radius: 20px;
+            font-size: 14px;
+            white-space: nowrap;
+            cursor: pointer;
+        }
+        
+        .rank-tab.active {
+            background-color: #ff6b6b;
+            color: white;
+        }
+        
+        /* 个人中心页样式 */
+        .user-profile {
+            background: linear-gradient(135deg, #4ecdc4, #45b7d1);
+            color: white;
+            padding: 24px;
+            border-radius: 12px;
+            margin-bottom: 20px;
+            text-align: center;
+        }
+        
+        .avatar {
+            width: 80px;
+            height: 80px;
+            border-radius: 50%;
+            background-color: white;
+            margin: 0 auto 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 32px;
+        }
+        
+        .feature-list {
+            background-color: white;
+            border-radius: 12px;
+            overflow: hidden;
+        }
+        
+        .feature-item {
+            padding: 16px;
+            border-bottom: 1px solid #f0f0f0;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            cursor: pointer;
+        }
+        
+        .feature-item:last-child {
+            border-bottom: none;
+        }
+        
+        .feature-item i {
+            color: #999;
+        }
+        
+        /* 商户卡片样式 */
+        .restaurant-card {
+            background-color: white;
+            border-radius: 12px;
+            overflow: hidden;
+            margin-bottom: 12px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        
+        .card-image {
+            width: 100%;
+            height: 180px;
+            overflow: hidden;
+        }
+        
+        .card-image img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+        
+        .favorite-btn-card {
+            position: absolute;
+            top: 12px;
+            right: 12px;
+            background: rgba(255, 255, 255, 0.9);
+            border: none;
+            border-radius: 50%;
+            width: 36px;
+            height: 36px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 18px;
+            cursor: pointer;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+            z-index: 10;
+        }
+        
+        .favorite-btn-card.favorited {
+            background: rgba(255, 107, 107, 0.9);
+            color: white;
+        }
+        
+        .card-image {
+            position: relative;
+        }
+        
+        .card-header,
+        .card-info,
+        .card-tags,
+        .card-location {
+            padding: 0 16px;
+        }
+        
+        .card-header {
+            padding-top: 16px;
+        }
+        
+        .card-location {
+            padding-bottom: 16px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .card-distance {
+            font-size: 12px;
+            color: #ff6b6b;
+            font-weight: 500;
+        }
+        
+        .card-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 12px;
+        }
+        
+        .card-header h4 {
+            font-size: 16px;
+            font-weight: 600;
+        }
+        
+        .shop-type-badge {
+            padding: 4px 8px;
+            border-radius: 4px;
+            font-size: 12px;
+            font-weight: 500;
+        }
+        
+        .shop-type-badge.store {
+            background-color: #e3f2fd;
+            color: #1976d2;
+        }
+        
+        .shop-type-badge.stall {
+            background-color: #fff3e0;
+            color: #f57c00;
+        }
+        
+        .card-info {
+            display: flex;
+            gap: 12px;
+            margin-bottom: 12px;
+            font-size: 14px;
+            color: #666;
+        }
+        
+        .card-tags {
+            display: flex;
+            gap: 8px;
+            margin-bottom: 12px;
+            flex-wrap: wrap;
+        }
+        
+        .tag {
+            background-color: #f5f5f5;
+            padding: 4px 8px;
+            border-radius: 4px;
+            font-size: 12px;
+            color: #666;
+        }
+        
+        .card-location {
+            font-size: 14px;
+            color: #999;
+        }
+        
+        /* 顶部位置和搜索样式 */
+        .header-top {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+            margin-bottom: 16px;
+        }
+        
+        .location {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 14px;
+            font-weight: 500;
+            cursor: pointer;
+        }
+        
+        .search-box {
+            position: relative;
+        }
+        
+        .search-input {
+            width: 100%;
+            padding: 12px 40px 12px 16px;
+            border: 1px solid #e0e0e0;
+            border-radius: 24px;
+            font-size: 14px;
+            background-color: #f5f5f5;
+        }
+        
+        .search-btn {
+            position: absolute;
+            right: 8px;
+            top: 50%;
+            transform: translateY(-50%);
+            background: none;
+            border: none;
+            font-size: 16px;
+            cursor: pointer;
+            padding: 4px;
+        }
+        
+        /* 认证页面样式 */
+        .auth-container {
+            max-width: 400px;
+            margin: 0 auto;
+            padding: 24px;
+            background-color: white;
+            border-radius: 12px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        
+        .auth-container h2 {
+            font-size: 20px;
+            font-weight: 600;
+            text-align: center;
+            margin-bottom: 8px;
+        }
+        
+        .auth-subtitle {
+            text-align: center;
+            color: #666;
+            margin-bottom: 24px;
+        }
+        
+        .form-group {
+            margin-bottom: 16px;
+        }
+        
+        .form-group label {
+            display: block;
+            font-size: 14px;
+            font-weight: 500;
+            margin-bottom: 8px;
+            color: #333;
+        }
+        
+        .form-input {
+            width: 100%;
+            padding: 12px;
+            border: 1px solid #e0e0e0;
+            border-radius: 8px;
+            font-size: 14px;
+            outline: none;
+        }
+        
+        .form-input:focus {
+            border-color: #ff6b6b;
+        }
+        
+        .code-input {
+            display: flex;
+            gap: 12px;
+        }
+        
+        .code-input .form-input {
+            flex: 1;
+        }
+        
+        .code-btn {
+            background-color: #f0f0f0;
+            border: none;
+            padding: 0 16px;
+            border-radius: 8px;
+            font-size: 14px;
+            cursor: pointer;
+        }
+        
+        .auth-btn {
+            width: 100%;
+            background-color: #ff6b6b;
+            color: white;
+            border: none;
+            padding: 14px;
+            border-radius: 8px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            margin-bottom: 16px;
+        }
+        
+        .auth-divider {
+            display: flex;
+            align-items: center;
+            margin: 24px 0;
+        }
+        
+        .auth-divider::before,
+        .auth-divider::after {
+            content: '';
+            flex: 1;
+            height: 1px;
+            background-color: #e0e0e0;
+        }
+        
+        .auth-divider span {
+            padding: 0 16px;
+            color: #999;
+            font-size: 14px;
+        }
+        
+        .wechat-btn {
+            width: 100%;
+            background-color: #07C160;
+            color: white;
+            border: none;
+            padding: 14px;
+            border-radius: 8px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+        }
+        
+        .auth-options {
+            display: flex;
+            gap: 24px;
+        }
+        
+        .radio-option {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            cursor: pointer;
+        }
+        
+        .upload-area {
+            border: 2px dashed #e0e0e0;
+            border-radius: 8px;
+            padding: 24px;
+            text-align: center;
+            cursor: pointer;
+        }
+        
+        .upload-area input[type="file"] {
+            display: none;
+        }
+        
+        .verify-tip {
+            text-align: center;
+            color: #999;
+            font-size: 12px;
+            margin-top: 12px;
+        }
+        
+        .badge {
+            background-color: #4ecdc4;
+            color: white;
+            padding: 4px 12px;
+            border-radius: 12px;
+            font-size: 12px;
+            font-weight: 600;
+        }
+        
+        /* 排行榜样式 */
+        .rank-item {
+            background-color: white;
+            border-radius: 12px;
+            padding: 16px;
+            margin-bottom: 12px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            display: flex;
+            align-items: center;
+        }
+        
+        .rank-item.top-3 {
+            padding: 20px;
+            border: 2px solid #ffd700;
+        }
+        
+        .rank-number {
+            font-size: 24px;
+            font-weight: 600;
+            margin-right: 16px;
+            min-width: 30px;
+            text-align: center;
+        }
+        
+        .rank-item.top-3 .rank-number {
+            font-size: 32px;
+        }
+        
+        .rank-number.gold {
+            color: #ffd700;
+        }
+        
+        .rank-number.silver {
+            color: #c0c0c0;
+        }
+        
+        .rank-number.bronze {
+            color: #cd7f32;
+        }
+        
+        .rank-info {
+            flex: 1;
+        }
+        
+        .rank-info h4 {
+            font-size: 16px;
+            font-weight: 600;
+            margin-bottom: 4px;
+        }
+        
+        .rank-reason {
+            font-size: 12px;
+            color: #666;
+            margin-bottom: 8px;
+            line-height: 1.4;
+        }
+        
+        .rank-details {
+            font-size: 14px;
+            color: #999;
+            display: flex;
+            gap: 12px;
+        }
+        
+        /* 商户详情弹窗样式 */
+        .detail-modal {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-color: rgba(0,0,0,0.5);
+            display: none;
+            align-items: flex-end;
+            justify-content: center;
+            z-index: 1000;
+        }
+        
+        .detail-modal.active {
+            display: flex;
+            animation: fadeIn 0.3s ease;
+        }
+        
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+        
+        .detail-content {
+            background-color: white;
+            border-radius: 20px 20px 0 0;
+            width: 100%;
+            max-height: 80vh;
+            overflow-y: auto;
+            animation: slideUp 0.3s ease;
+        }
+        
+        @keyframes slideUp {
+            from { transform: translateY(100%); }
+            to { transform: translateY(0); }
+        }
+        
+        .detail-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 16px 20px;
+            border-bottom: 1px solid #f0f0f0;
+            position: sticky;
+            top: 0;
+            background-color: white;
+        }
+        
+        .detail-header h3 {
+            font-size: 18px;
+            font-weight: 600;
+        }
+        
+        .close-btn {
+            background: none;
+            border: none;
+            font-size: 24px;
+            cursor: pointer;
+            padding: 4px;
+        }
+        
+        .detail-body {
+            padding: 20px;
+        }
+        
+        .detail-image {
+            width: 100%;
+            height: 200px;
+            border-radius: 12px;
+            overflow: hidden;
+            margin-bottom: 16px;
+        }
+        
+        .placeholder-image {
+            width: 100%;
+            height: 100%;
+            background-color: #f5f5f5;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 48px;
+        }
+        
+        .detail-basic {
+            display: flex;
+            gap: 12px;
+            margin-bottom: 12px;
+            font-size: 14px;
+            color: #666;
+        }
+        
+        .detail-type {
+            padding: 2px 8px;
+            border-radius: 4px;
+            font-size: 12px;
+        }
+        
+        .detail-type.store {
+            background-color: #e3f2fd;
+            color: #1976d2;
+        }
+        
+        .detail-type.stall {
+            background-color: #fff3e0;
+            color: #f57c00;
+        }
+        
+        .detail-tags {
+            display: flex;
+            gap: 8px;
+            margin-bottom: 16px;
+            flex-wrap: wrap;
+        }
+        
+        .detail-location {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 14px;
+            color: #666;
+            margin-bottom: 20px;
+        }
+        
+        .detail-menu,
+        .detail-reviews {
+            margin-bottom: 20px;
+        }
+        
+        .detail-menu h4,
+        .detail-reviews h4 {
+            font-size: 16px;
+            font-weight: 600;
+            margin-bottom: 12px;
+        }
+        
+        .menu-items {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+        
+        .menu-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 12px;
+            background-color: #f9f9f9;
+            border-radius: 8px;
+        }
+        
+        .menu-item-name {
+            font-size: 14px;
+            font-weight: 500;
+        }
+        
+        .menu-item-price {
+            font-size: 14px;
+            color: #ff6b6b;
+            font-weight: 600;
+        }
+        
+        .review-items {
+            display: flex;
+            flex-direction: column;
+            gap: 16px;
+        }
+        
+        .review-item {
+            padding: 12px;
+            background-color: #f9f9f9;
+            border-radius: 8px;
+        }
+        
+        .review-user {
+            font-size: 12px;
+            color: #999;
+            margin-bottom: 8px;
+        }
+        
+        .review-content {
+            font-size: 14px;
+            line-height: 1.4;
+        }
+        
+        /* 评价表单样式 */
+        .detail-review-form {
+            margin-bottom: 20px;
+            padding: 16px;
+            background-color: #f9f9f9;
+            border-radius: 8px;
+        }
+        
+        .review-textarea {
+            width: 100%;
+            min-height: 100px;
+            padding: 12px;
+            border: 1px solid #e0e0e0;
+            border-radius: 8px;
+            font-size: 14px;
+            resize: vertical;
+            margin-bottom: 12px;
+        }
+        
+        .review-actions {
+            display: flex;
+            justify-content: flex-end;
+        }
+        
+        .submit-review-btn {
+            background-color: #ff6b6b;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 8px;
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+        }
+        
+        /* 评分样式 */
+        .review-rating {
+            display: flex;
+            align-items: center;
+            margin-bottom: 12px;
+        }
+        
+        .rating-stars {
+            display: flex;
+            gap: 8px;
+            margin-left: 12px;
+        }
+        
+        .star {
+            font-size: 24px;
+            color: #e0e0e0;
+            cursor: pointer;
+            transition: color 0.3s ease;
+        }
+        
+        .star.active {
+            color: #ffd700;
+        }
+        
+        .star:hover {
+            color: #ffed4e;
+        }
+        
+        /* 评价卡片样式 */
+        .review-card {
+            background-color: white;
+            border-radius: 12px;
+            padding: 16px;
+            margin-bottom: 12px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        
+        .review-card-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            margin-bottom: 12px;
+        }
+        
+        .review-restaurant h4 {
+            font-size: 16px;
+            font-weight: 600;
+            margin-bottom: 4px;
+        }
+        
+        .review-date {
+            font-size: 12px;
+            color: #999;
+        }
+        
+        .delete-review-btn {
+            background: none;
+            border: none;
+            font-size: 16px;
+            cursor: pointer;
+            padding: 4px;
+        }
+        
+        .review-card-content {
+            font-size: 14px;
+            line-height: 1.4;
+            color: #333;
+        }
+        
+        .review-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 8px;
+        }
+        
+        .review-rating-stars {
+            color: #ffd700;
+            font-size: 12px;
+        }
+        
+        .review-meta {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+        
+        .review-card-rating {
+            color: #ffd700;
+            font-size: 12px;
+        }
+        
+        /* 盲盒功能样式 */
+        .blind-box-options {
+            padding: 16px 0;
+        }
+        
+        .option-group {
+            margin-bottom: 24px;
+        }
+        
+        .option-group h4 {
+            font-size: 16px;
+            font-weight: 600;
+            margin-bottom: 12px;
+        }
+        
+        .price-options,
+        .cuisine-options {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 12px;
+        }
+        
+        .option-item {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            background-color: #f5f5f5;
+            padding: 8px 16px;
+            border-radius: 20px;
+            cursor: pointer;
+        }
+        
+        .option-item input[type="radio"] {
+            accent-color: #ff6b6b;
+        }
+        
+        .start-blind-box-btn {
+            width: 100%;
+            background-color: #ff6b6b;
+            color: white;
+            border: none;
+            padding: 14px;
+            border-radius: 8px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            margin-top: 24px;
+        }
+        
+        /* 盲盒结果样式 */
+        .blind-box-result {
+            text-align: center;
+        }
+        
+        .result-image {
+            width: 200px;
+            height: 200px;
+            border-radius: 50%;
+            overflow: hidden;
+            margin: 0 auto 20px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+        }
+        
+        .result-image img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+        
+        .result-name {
+            font-size: 20px;
+            font-weight: 600;
+            margin-bottom: 12px;
+        }
+        
+        .result-basic {
+            display: flex;
+            justify-content: center;
+            gap: 12px;
+            margin-bottom: 12px;
+        }
+        
+        .result-type {
+            padding: 4px 12px;
+            border-radius: 12px;
+            font-size: 12px;
+            font-weight: 500;
+        }
+        
+        .result-type.store {
+            background-color: #e3f2fd;
+            color: #1976d2;
+        }
+        
+        .result-type.stall {
+            background-color: #fff3e0;
+            color: #f57c00;
+        }
+        
+        .result-price,
+        .result-score {
+            font-size: 14px;
+            color: #666;
+        }
+        
+        .result-cuisine {
+            font-size: 16px;
+            margin-bottom: 12px;
+            color: #333;
+        }
+        
+        .result-tags {
+            display: flex;
+            justify-content: center;
+            gap: 8px;
+            flex-wrap: wrap;
+            margin-bottom: 16px;
+        }
+        
+        .result-location {
+            font-size: 14px;
+            color: #666;
+            margin-bottom: 24px;
+        }
+        
+        .result-actions {
+            display: flex;
+            gap: 12px;
+        }
+        
+        .result-btn {
+            flex: 1;
+            padding: 12px;
+            border: none;
+            border-radius: 8px;
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+        }
+        
+        .view-btn {
+            background-color: #ff6b6b;
+            color: white;
+        }
+        
+        .another-btn {
+            background-color: #f0f0f0;
+            color: #333;
+        }
+        
+        .detail-footer {
+            display: flex;
+            gap: 12px;
+            padding: 16px 20px;
+            border-top: 1px solid #f0f0f0;
+            position: sticky;
+            bottom: 0;
+            background-color: white;
+        }
+        
+        .action-btn {
+            flex: 1;
+            padding: 14px;
+            border: none;
+            border-radius: 8px;
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+        }
+        
+        .favorite-btn {
+            background-color: #f0f0f0;
+            color: #333;
+        }
+        
+        .order-btn {
+            background-color: #ff6b6b;
+            color: white;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- 认证页面 -->
+        <div id="auth" class="page active">
+            <div class="content">
+                <div class="auth-container">
+                    <h2>欢迎来到大学城美食地图</h2>
+                    <p class="auth-subtitle">请登录并认证学籍，享受纯净学生社区</p>
+                    
+                    <div class="auth-form">
+                        <div class="form-group">
+                            <label>手机号</label>
+                            <input type="tel" id="phone" placeholder="请输入手机号" class="form-input" value="13800138000">
+                        </div>
+                        <div class="form-group">
+                            <label>验证码</label>
+                            <div class="code-input">
+                                <input type="text" id="code" placeholder="请输入验证码" class="form-input" value="123456">
+                                <button id="send-code" class="code-btn">发送验证码</button>
+                            </div>
+                        </div>
+                        <p style="text-align: center; font-size: 12px; color: #999; margin-bottom: 16px;">测试账号：13800138000  验证码：123456</p>
+                        <button id="login-btn" class="auth-btn">登录</button>
+                        <div class="auth-divider">
+                            <span>或</span>
+                        </div>
+                        <button class="wechat-btn">
+                            <span>💬</span>
+                            微信登录
+                        </button>
+                    </div>
+                    
+                    <div class="verification-form" style="display: none;">
+                        <h3>学籍认证</h3>
+                        <p class="auth-subtitle">认证后享受专属学生权益</p>
+                        
+                        <div class="form-group">
+                            <label>所属高校</label>
+                            <select id="school" class="form-input">
+                                <option value="">请选择学校</option>
+                                <option value="university1">北京大学</option>
+                                <option value="university2">清华大学</option>
+                                <option value="university3">北京师范大学</option>
+                                <option value="university4">北京理工大学</option>
+                                <option value="university5">北京航空航天大学</option>
+                            </select>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label>认证方式</label>
+                            <div class="auth-options">
+                                <label class="radio-option">
+                                    <input type="radio" name="auth-type" value="id-card" checked>
+                                    上传证件照
+                                </label>
+                                <label class="radio-option">
+                                    <input type="radio" name="auth-type" value="edu-email">
+                                    Edu邮箱验证码
+                                </label>
+                            </div>
+                        </div>
+                        
+                        <div class="form-group" id="id-card-upload">
+                            <label>上传学生证/校园卡</label>
+                            <div class="upload-area">
+                                <input type="file" accept="image/*" id="id-card-file">
+                                <p>点击上传图片</p>
+                            </div>
+                        </div>
+                        
+                        <div class="form-group" id="edu-email-form" style="display: none;">
+                            <label>Edu邮箱</label>
+                            <input type="email" id="edu-email" placeholder="请输入edu邮箱" class="form-input">
+                            <button id="send-email-code" class="code-btn">发送验证码</button>
+                            <input type="text" id="email-code" placeholder="请输入邮箱验证码" class="form-input">
+                        </div>
+                        
+                        <button id="verify-btn" class="auth-btn">提交认证</button>
+                        <p class="verify-tip">提交后将进入人工/系统审核，预计24小时通过</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- 推荐页 -->
+        <div id="recommend" class="page">
+            <div class="content">
+                <div class="header-top">
+                    <div class="location" id="location">
+                        <span>📍</span>
+                        <span id="current-location">北京大学南校区</span>
+                        <span>▼</span>
+                    </div>
+                    <div class="search-box">
+                        <input type="text" placeholder="搜索店名、菜系、标签" class="search-input">
+                        <button class="search-btn">🔍</button>
+                    </div>
+                </div>
+                
+                <div class="hero-section">
+                    <h2>不知道吃啥？</h2>
+                    <p>试试吃啥盲盒，随机发现美食</p>
+                    <button class="blind-box-btn">🔄 开盲盒</button>
+                </div>
+                
+                <h3 class="section-title">附近美食</h3>
+                <div id="restaurant-list">
+                    <!-- 商户卡片将通过JS动态生成 -->
+                </div>
+            </div>
+        </div>
+        
+        <!-- 排行榜页 -->
+        <div id="leaderboard" class="page">
+            <div class="content">
+                <div class="rank-tabs">
+                    <div class="rank-tab active">低价榜</div>
+                    <div class="rank-tab">早八榜</div>
+                    <div class="rank-tab">团建榜</div>
+                    <div class="rank-tab">单人食榜</div>
+                    <div class="rank-tab">避坑黑榜</div>
+                </div>
+                
+                <h3 class="section-title">排行榜</h3>
+                <div id="rank-list">
+                    <!-- 排行榜内容将通过JS动态生成 -->
+                </div>
+            </div>
+        </div>
+        
+        <!-- 我的页 -->
+        <div id="mine" class="page">
+            <div class="content">
+                <div class="user-profile">
+                    <div class="avatar">👤</div>
+                    <h3 id="user-name">未登录</h3>
+                    <p id="user-school">点击登录并认证学籍</p>
+                    <div id="verified-badge" style="display: none;">
+                        <span class="badge">已认证校友</span>
+                    </div>
+                </div>
+                
+                <div class="feature-list">
+                    <div class="feature-item">
+                        <span>浏览记录</span>
+                        <i>→</i>
+                    </div>
+                    <div class="feature-item">
+                        <span>我的收藏</span>
+                        <i>→</i>
+                    </div>
+                    <div class="feature-item">
+                        <span>我的评价</span>
+                        <i>→</i>
+                    </div>
+                    <div class="feature-item" id="logout-btn">
+                        <span>退出登录</span>
+                        <i>→</i>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- 商户详情弹窗 -->
+    <div id="restaurant-detail" class="detail-modal">
+        <div class="detail-content">
+            <div class="detail-header">
+                <h3 id="detail-name">商户名称</h3>
+                <button id="close-detail" class="close-btn">✕</button>
+            </div>
+            <div class="detail-body">
+                <div class="detail-image">
+                    <!-- 商户图片 -->
+                    <div class="placeholder-image">🍽️</div>
+                </div>
+                <div class="detail-info">
+                    <div class="detail-basic">
+                        <span class="detail-price">¥0/人</span>
+                        <span class="detail-cuisine">菜系</span>
+                        <span class="detail-score">0分</span>
+                        <span class="detail-type">门店</span>
+                    </div>
+                    <div class="detail-tags">
+                        <!-- 标签将动态生成 -->
+                    </div>
+                    <div class="detail-location">
+                        <span>📍</span>
+                        <span id="detail-location">位置描述</span>
+                    </div>
+                    <div class="detail-menu">
+                        <h4>推荐菜单</h4>
+                        <div class="menu-items">
+                            <!-- 菜单将动态生成 -->
+                        </div>
+                    </div>
+                    <div class="detail-reviews">
+                        <h4>校友评价</h4>
+                        <div class="review-items">
+                            <!-- 评价将动态生成 -->
+                        </div>
+                    </div>
+                    <div class="detail-review-form">
+                        <h4>发表评价</h4>
+                        <div class="review-rating">
+                            <span>评分：</span>
+                            <div class="rating-stars">
+                                <span class="star" data-rating="1">★</span>
+                                <span class="star" data-rating="2">★</span>
+                                <span class="star" data-rating="3">★</span>
+                                <span class="star" data-rating="4">★</span>
+                                <span class="star" data-rating="5">★</span>
+                            </div>
+                            <input type="hidden" id="review-rating" value="5">
+                        </div>
+                        <textarea id="review-content" placeholder="分享你的用餐体验..." class="review-textarea"></textarea>
+                        <div class="review-actions">
+                            <button id="submit-review" class="submit-review-btn">发布评价</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="detail-footer">
+                <button class="action-btn favorite-btn">❤️ 收藏</button>
+                <button class="action-btn order-btn">📞 预订</button>
+            </div>
+        </div>
+    </div>
+    
+    <div class="tab-bar">
+        <div class="tab-item active" data-page="recommend">
+            <div class="tab-icon">🏠</div>
+            <div class="tab-label">推荐</div>
+        </div>
+        <div class="tab-item" data-page="leaderboard">
+            <div class="tab-icon">🏆</div>
+            <div class="tab-label">排行榜</div>
+        </div>
+        <div class="tab-item" data-page="mine">
+            <div class="tab-icon">👤</div>
+            <div class="tab-label">我的</div>
+        </div>
+    </div>
+    
+    <script>
+        // 数据模型定义 - 上海交通大学大学城店铺
+        const mockRestaurants = [
+            {
+                shop_id: 1,
+                name: "东北饺子馆",
+                shop_type: "门店",
+                cuisine: "东北菜",
+                avg_price: 20,
+                score: 4.8,
+                tags: ["深夜外卖", "性价比高"],
+                location_desc: "上海交通大学南二门左转50米",
+                image: "https://trae-api-cn.mchost.guru/api/ide/v1/text_to_image?prompt=chinese%20northeastern%20dumplings%20restaurant%20interior&image_size=square",
+                lat: 31.1949,
+                lng: 121.4368
+            },
+            {
+                shop_id: 2,
+                name: "煎饼果子摊",
+                shop_type: "小吃摊",
+                cuisine: "早餐",
+                avg_price: 8,
+                score: 4.6,
+                tags: ["早八必备", "手抓饼"],
+                location_desc: "上海交通大学食堂门口",
+                image: "https://trae-api-cn.mchost.guru/api/ide/v1/text_to_image?prompt=chinese%20pancake%20stall%20street%20food&image_size=square",
+                lat: 31.1955,
+                lng: 121.4370
+            },
+            {
+                shop_id: 3,
+                name: "川味小炒",
+                shop_type: "门店",
+                cuisine: "川菜",
+                avg_price: 25,
+                score: 4.7,
+                tags: ["团建聚餐", "辣味十足"],
+                location_desc: "上海交通大学美食街中段",
+                image: "https://trae-api-cn.mchost.guru/api/ide/v1/text_to_image?prompt=sichuan%20restaurant%20spicy%20food&image_size=square",
+                lat: 31.1960,
+                lng: 121.4375
+            },
+            {
+                shop_id: 4,
+                name: "奶茶店",
+                shop_type: "门店",
+                cuisine: "饮品",
+                avg_price: 15,
+                score: 4.5,
+                tags: ["休闲小憩", "网红打卡"],
+                location_desc: "上海交通大学图书馆对面",
+                image: "https://trae-api-cn.mchost.guru/api/ide/v1/text_to_image?prompt=bubble%20tea%20shop%20modern%20interior&image_size=square",
+                lat: 31.1940,
+                lng: 121.4365
+            },
+            {
+                shop_id: 5,
+                name: "烧烤摊",
+                shop_type: "小吃摊",
+                cuisine: "烧烤",
+                avg_price: 30,
+                score: 4.9,
+                tags: ["深夜食堂", "朋友聚会"],
+                location_desc: "上海交通大学北门夜市",
+                image: "https://trae-api-cn.mchost.guru/api/ide/v1/text_to_image?prompt=chinese%20barbecue%20stall%20night%20market&image_size=square",
+                lat: 31.1965,
+                lng: 121.4380
+            },
+            {
+                shop_id: 6,
+                name: "快餐店",
+                shop_type: "门店",
+                cuisine: "快餐",
+                avg_price: 15,
+                score: 4.3,
+                tags: ["单人食", "出餐快"],
+                location_desc: "上海交通大学教学楼附近",
+                image: "https://trae-api-cn.mchost.guru/api/ide/v1/text_to_image?prompt=fast%20food%20restaurant%20interior&image_size=square",
+                lat: 31.1935,
+                lng: 121.4360
+            },
+            {
+                shop_id: 7,
+                name: "水果摊",
+                shop_type: "小吃摊",
+                cuisine: "水果",
+                avg_price: 10,
+                score: 4.4,
+                tags: ["健康饮食", "月底吃土"],
+                location_desc: "上海交通大学宿舍楼下",
+                image: "https://trae-api-cn.mchost.guru/api/ide/v1/text_to_image?prompt=fresh%20fruit%20stall%20display&image_size=square",
+                lat: 31.1930,
+                lng: 121.4355
+            },
+            {
+                shop_id: 8,
+                name: "日料店",
+                shop_type: "门店",
+                cuisine: "日料",
+                avg_price: 40,
+                score: 4.6,
+                tags: ["情侣约会", "精致料理"],
+                location_desc: "上海交通大学商业街",
+                image: "https://trae-api-cn.mchost.guru/api/ide/v1/text_to_image?prompt=japanese%20restaurant%20sushi%20bar&image_size=square",
+                lat: 31.1970,
+                lng: 121.4385
+            },
+            {
+                shop_id: 9,
+                name: "麻辣烫",
+                shop_type: "小吃摊",
+                cuisine: "川味",
+                avg_price: 18,
+                score: 4.7,
+                tags: ["深夜外卖", "自选食材"],
+                location_desc: "上海交通大学南门小吃街",
+                image: "https://trae-api-cn.mchost.guru/api/ide/v1/text_to_image?prompt=chinese%20malatang%20spicy%20hot%20pot&image_size=square",
+                lat: 31.1925,
+                lng: 121.4350
+            },
+            {
+                shop_id: 10,
+                name: "蛋糕店",
+                shop_type: "门店",
+                cuisine: "甜点",
+                avg_price: 22,
+                score: 4.5,
+                tags: ["生日聚会", "下午茶"],
+                location_desc: "上海交通大学购物中心",
+                image: "https://trae-api-cn.mchost.guru/api/ide/v1/text_to_image?prompt=bakery%20shop%20cakes%20display&image_size=square",
+                lat: 31.1975,
+                lng: 121.4390
+            }
+        ];
+        
+        // 全局状态
+        let userToken = localStorage.getItem('userToken');
+        let userInfo = JSON.parse(localStorage.getItem('userInfo') || 'null');
+        let userLocation = { lat: 31.1949, lng: 121.4368 }; // 默认位置（上海交通大学）
+        let locationUpdated = false;
+        
+        // 收藏和浏览记录数据
+        let favorites = JSON.parse(localStorage.getItem('favorites') || '[]');
+        let browsingHistory = JSON.parse(localStorage.getItem('browsingHistory') || '[]');
+        let reviews = JSON.parse(localStorage.getItem('reviews') || '[]');
+        
+        // 获取用户当前位置
+        function getUserLocation() {
+            if (navigator.geolocation) {
+                // 显示位置获取提示
+                const locationElement = document.getElementById('current-location');
+                locationElement.textContent = '正在获取位置...';
+                
+                // 增加位置获取的超时设置
+                const options = {
+                    enableHighAccuracy: true,
+                    timeout: 5000,
+                    maximumAge: 0
+                };
+                
+                navigator.geolocation.getCurrentPosition(
+                    (position) => {
+                        userLocation = {
+                            lat: position.coords.latitude,
+                            lng: position.coords.longitude
+                        };
+                        locationUpdated = true;
+                        console.log('获取到用户位置:', userLocation);
+                        // 更新位置显示
+                        locationElement.textContent = '当前位置';
+                        // 重新渲染商户列表以显示真实距离
+                        if (document.getElementById('recommend').classList.contains('active')) {
+                            renderRestaurants();
+                        }
+                    },
+                    (error) => {
+                        console.error('获取位置失败:', error);
+                        // 显示详细的错误信息
+                        const locationElement = document.getElementById('current-location');
+                        switch(error.code) {
+                            case error.PERMISSION_DENIED:
+                                locationElement.textContent = '位置权限被拒绝';
+                                break;
+                            case error.POSITION_UNAVAILABLE:
+                                locationElement.textContent = '位置信息不可用';
+                                break;
+                            case error.TIMEOUT:
+                                locationElement.textContent = '位置获取超时';
+                                break;
+                            case error.UNKNOWN_ERROR:
+                                locationElement.textContent = '位置获取失败';
+                                break;
+                            default:
+                                locationElement.textContent = '位置获取失败';
+                        }
+                        // 使用默认位置
+                    },
+                    options
+                );
+            } else {
+                console.error('浏览器不支持地理定位');
+                // 显示不支持提示
+                const locationElement = document.getElementById('current-location');
+                locationElement.textContent = '浏览器不支持定位';
+            }
+        }
+        
+        // 计算两点之间的距离（单位：米）
+        function calculateDistance(lat1, lng1, lat2, lng2) {
+            const R = 6371e3; // 地球半径（米）
+            const φ1 = (lat1 * Math.PI) / 180;
+            const φ2 = (lat2 * Math.PI) / 180;
+            const Δφ = ((lat2 - lat1) * Math.PI) / 180;
+            const Δλ = ((lng2 - lng1) * Math.PI) / 180;
+            
+            const a =
+                Math.sin(Δφ / 2) * Math.sin(Δφ / 2) +
+                Math.cos(φ1) * Math.cos(φ2) * Math.sin(Δλ / 2) * Math.sin(Δλ / 2);
+            const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+            
+            return R * c;
+        }
+        
+        // 获取商户距离
+        function getRestaurantDistance(restaurant) {
+            const distance = calculateDistance(
+                userLocation.lat,
+                userLocation.lng,
+                restaurant.lat,
+                restaurant.lng
+            );
+            
+            if (distance < 1000) {
+                return distance.toFixed(0) + 'm';
+            } else {
+                return (distance / 1000).toFixed(1) + 'km';
+            }
+        }
+        
+        // 检查商户是否被收藏
+        function isFavorite(shopId) {
+            return favorites.includes(shopId);
+        }
+        
+        // 切换收藏状态
+        function toggleFavorite(shopId) {
+            const index = favorites.indexOf(shopId);
+            if (index > -1) {
+                // 取消收藏
+                favorites.splice(index, 1);
+            } else {
+                // 添加收藏
+                favorites.push(shopId);
+            }
+            // 保存到本地存储
+            localStorage.setItem('favorites', JSON.stringify(favorites));
+        }
+        
+        // 添加浏览记录
+        function addBrowsingHistory(restaurant) {
+            // 移除已存在的记录
+            browsingHistory = browsingHistory.filter(item => item.shop_id !== restaurant.shop_id);
+            // 添加到开头
+            browsingHistory.unshift(restaurant);
+            // 限制历史记录数量
+            if (browsingHistory.length > 20) {
+                browsingHistory = browsingHistory.slice(0, 20);
+            }
+            // 保存到本地存储
+            localStorage.setItem('browsingHistory', JSON.stringify(browsingHistory));
+        }
+        
+        // 导航切换
+        const tabItems = document.querySelectorAll('.tab-item');
+        const pages = document.querySelectorAll('.page');
+        
+        tabItems.forEach(tab => {
+            tab.addEventListener('click', () => {
+                const pageId = tab.dataset.page;
+                
+                // 路由守卫：未登录用户跳转到认证页
+                if (!userToken && pageId !== 'auth') {
+                    showPage('auth');
+                    return;
+                }
+                
+                // 更新tab状态
+                tabItems.forEach(item => item.classList.remove('active'));
+                tab.classList.add('active');
+                
+                // 更新页面显示
+                showPage(pageId);
+                
+                // 如果切换到推荐页，渲染商户卡片
+                if (pageId === 'recommend') {
+                    // 清空搜索框
+                    const searchInput = document.querySelector('.search-input');
+                    searchInput.value = '';
+                    // 渲染所有商户
+                    renderRestaurants();
+                } else if (pageId === 'leaderboard') {
+                    // 切换到排行榜页，默认渲染低价榜
+                    renderLeaderboard('低价榜');
+                }
+            });
+        });
+        
+        // 显示指定页面
+        function showPage(pageId) {
+            pages.forEach(page => page.classList.remove('active'));
+            document.getElementById(pageId).classList.add('active');
+        }
+        
+        // 排行榜标签切换
+        const rankTabs = document.querySelectorAll('.rank-tab');
+        rankTabs.forEach(tab => {
+            tab.addEventListener('click', () => {
+                rankTabs.forEach(item => item.classList.remove('active'));
+                tab.classList.add('active');
+                
+                // 渲染对应排行榜
+                const rankType = tab.textContent.trim();
+                renderLeaderboard(rankType);
+            });
+        });
+        
+        // 渲染排行榜
+        function renderLeaderboard(rankType) {
+            const rankList = document.getElementById('rank-list');
+            rankList.innerHTML = '';
+            
+            let sortedRestaurants = [...mockRestaurants];
+            
+            // 根据不同榜单类型排序
+            switch(rankType) {
+                case '低价榜':
+                    sortedRestaurants.sort((a, b) => a.avg_price - b.avg_price);
+                    break;
+                case '早八榜':
+                    // 假设出餐快的店铺更适合早八
+                    sortedRestaurants.sort((a, b) => {
+                        const aHasBreakfast = a.tags.includes('早八必备') || a.cuisine === '早餐';
+                        const bHasBreakfast = b.tags.includes('早八必备') || b.cuisine === '早餐';
+                        if (aHasBreakfast && !bHasBreakfast) return -1;
+                        if (!aHasBreakfast && bHasBreakfast) return 1;
+                        return a.avg_price - b.avg_price;
+                    });
+                    break;
+                case '团建榜':
+                    // 假设适合团建的店铺
+                    sortedRestaurants.sort((a, b) => {
+                        const aHasTeam = a.tags.includes('团建聚餐') || a.tags.includes('朋友聚会');
+                        const bHasTeam = b.tags.includes('团建聚餐') || b.tags.includes('朋友聚会');
+                        if (aHasTeam && !bHasTeam) return -1;
+                        if (!aHasTeam && bHasTeam) return 1;
+                        return b.score - a.score;
+                    });
+                    break;
+                case '单人食榜':
+                    // 假设适合单人的店铺
+                    sortedRestaurants.sort((a, b) => {
+                        const aHasSingle = a.tags.includes('单人食');
+                        const bHasSingle = b.tags.includes('单人食');
+                        if (aHasSingle && !bHasSingle) return -1;
+                        if (!aHasSingle && bHasSingle) return 1;
+                        return a.avg_price - b.avg_price;
+                    });
+                    break;
+                case '避坑黑榜':
+                    // 低分店铺
+                    sortedRestaurants.sort((a, b) => a.score - b.score);
+                    break;
+            }
+            
+            // 渲染排行榜
+            sortedRestaurants.forEach((restaurant, index) => {
+                const rankItem = document.createElement('div');
+                rankItem.className = `rank-item ${index < 3 ? 'top-3' : ''}`;
+                
+                let rankClass = '';
+                if (index === 0) rankClass = 'gold';
+                else if (index === 1) rankClass = 'silver';
+                else if (index === 2) rankClass = 'bronze';
+                
+                // 生成上榜理由
+                let reason = '';
+                switch(rankType) {
+                    case '低价榜':
+                        reason = `人均只要¥${restaurant.avg_price}，性价比超高！`;
+                        break;
+                    case '早八榜':
+                        reason = restaurant.tags.includes('早八必备') ? '早八必备，出餐极快！' : '适合赶时间的早八人';
+                        break;
+                    case '团建榜':
+                        reason = restaurant.tags.includes('团建聚餐') ? '团建首选，氛围绝佳！' : '适合多人聚会';
+                        break;
+                    case '单人食榜':
+                        reason = restaurant.tags.includes('单人食') ? '单人食好去处，安静舒适！' : '适合独自用餐';
+                        break;
+                    case '避坑黑榜':
+                        reason = `评分较低，建议谨慎选择`;
+                        break;
+                }
+                
+                rankItem.innerHTML = `
+                    <div class="rank-number ${rankClass}">${index + 1}</div>
+                    <div class="rank-info">
+                        <h4>${restaurant.name}</h4>
+                        <div class="rank-reason">${reason}</div>
+                        <div class="rank-details">
+                            <span>¥${restaurant.avg_price}/人</span>
+                            <span>${restaurant.cuisine}</span>
+                            <span>${restaurant.score}分</span>
+                        </div>
+                    </div>
+                `;
+                rankList.appendChild(rankItem);
+            });
+        }
+        
+        // 吃啥盲盒功能
+        document.querySelector('.blind-box-btn').addEventListener('click', () => {
+            showBlindBoxOptions();
+        });
+        
+        // 显示盲盒选项
+        function showBlindBoxOptions() {
+            const modal = document.createElement('div');
+            modal.className = 'detail-modal active';
+            modal.innerHTML = `
+                <div class="detail-content" style="max-height: 80vh;">
+                    <div class="detail-header">
+                        <h3>吃啥盲盒</h3>
+                        <button class="close-btn">✕</button>
+                    </div>
+                    <div class="detail-body">
+
+                        <div class="blind-box-options">
+                            <div class="option-group">
+                                <h4>价格范围</h4>
+                                <div class="price-options">
+                                    <label class="option-item">
+                                        <input type="radio" name="price" value="all" checked>
+                                        <span>全部</span>
+                                    </label>
+                                    <label class="option-item">
+                                        <input type="radio" name="price" value="low">
+                                        <span>¥0-20</span>
+                                    </label>
+                                    <label class="option-item">
+                                        <input type="radio" name="price" value="medium">
+                                        <span>¥21-40</span>
+                                    </label>
+                                    <label class="option-item">
+                                        <input type="radio" name="price" value="high">
+                                        <span>¥40+</span>
+                                    </label>
+                                </div>
+                            </div>
+                            
+                            <div class="option-group">
+                                <h4>口味偏好</h4>
+                                <div class="cuisine-options">
+                                    <label class="option-item">
+                                        <input type="radio" name="cuisine" value="all" checked>
+                                        <span>全部</span>
+                                    </label>
+                                    <label class="option-item">
+                                        <input type="radio" name="cuisine" value="中餐">
+                                        <span>中餐</span>
+                                    </label>
+                                    <label class="option-item">
+                                        <input type="radio" name="cuisine" value="西餐">
+                                        <span>西餐</span>
+                                    </label>
+                                    <label class="option-item">
+                                        <input type="radio" name="cuisine" value="日韩">
+                                        <span>日韩</span>
+                                    </label>
+                                    <label class="option-item">
+                                        <input type="radio" name="cuisine" value="饮品">
+                                        <span>饮品</span>
+                                    </label>
+                                </div>
+                            </div>
+                            
+                            <div class="option-group">
+                                <h4>距离范围</h4>
+                                <div class="distance-options">
+                                    <label class="option-item">
+                                        <input type="radio" name="distance" value="all" checked>
+                                        <span>全部</span>
+                                    </label>
+                                    <label class="option-item">
+                                        <input type="radio" name="distance" value="500">
+                                        <span>500米内</span>
+                                    </label>
+                                    <label class="option-item">
+                                        <input type="radio" name="distance" value="1000">
+                                        <span>1公里内</span>
+                                    </label>
+                                    <label class="option-item">
+                                        <input type="radio" name="distance" value="2000">
+                                        <span>2公里内</span>
+                                    </label>
+                                </div>
+                            </div>
+                            
+                            <button class="start-blind-box-btn">开始抽盲盒</button>
+                        </div>
+                    </div>
+                </div>
+            `;
+            document.body.appendChild(modal);
+            
+            // 关闭按钮
+            modal.querySelector('.close-btn').addEventListener('click', () => {
+                modal.remove();
+            });
+            
+            // 开始抽盲盒
+            modal.querySelector('.start-blind-box-btn').addEventListener('click', () => {
+                const priceValue = modal.querySelector('input[name="price"]:checked').value;
+                const cuisineValue = modal.querySelector('input[name="cuisine"]:checked').value;
+                const distanceValue = modal.querySelector('input[name="distance"]:checked').value;
+                
+                // 过滤商户
+                let filteredRestaurants = [...mockRestaurants];
+                
+                // 价格过滤
+                if (priceValue === 'low') {
+                    filteredRestaurants = filteredRestaurants.filter(r => r.avg_price <= 20);
+                } else if (priceValue === 'medium') {
+                    filteredRestaurants = filteredRestaurants.filter(r => r.avg_price > 20 && r.avg_price <= 40);
+                } else if (priceValue === 'high') {
+                    filteredRestaurants = filteredRestaurants.filter(r => r.avg_price > 40);
+                }
+                
+                // 口味过滤
+                if (cuisineValue !== 'all') {
+                    if (cuisineValue === '中餐') {
+                        filteredRestaurants = filteredRestaurants.filter(r => 
+                            ['东北菜', '川菜', '早餐', '烧烤', '快餐', '川味'].includes(r.cuisine)
+                        );
+                    } else if (cuisineValue === '西餐') {
+                        filteredRestaurants = filteredRestaurants.filter(r => 
+                            ['快餐'].includes(r.cuisine)
+                        );
+                    } else if (cuisineValue === '日韩') {
+                        filteredRestaurants = filteredRestaurants.filter(r => 
+                            ['日料'].includes(r.cuisine)
+                        );
+                    } else if (cuisineValue === '饮品') {
+                        filteredRestaurants = filteredRestaurants.filter(r => 
+                            ['饮品'].includes(r.cuisine)
+                        );
+                    }
+                }
+                
+                // 距离过滤
+                if (distanceValue !== 'all') {
+                    const maxDistance = parseInt(distanceValue);
+                    filteredRestaurants = filteredRestaurants.filter(r => {
+                        const distance = calculateDistance(
+                            userLocation.lat,
+                            userLocation.lng,
+                            r.lat,
+                            r.lng
+                        );
+                        return distance <= maxDistance;
+                    });
+                }
+                
+                if (filteredRestaurants.length === 0) {
+                    alert('没有符合条件的商户');
+                    modal.remove();
+                    return;
+                }
+                
+                // 随机选择一个商户
+                const randomIndex = Math.floor(Math.random() * filteredRestaurants.length);
+                const randomRestaurant = filteredRestaurants[randomIndex];
+                
+                modal.remove();
+                showBlindBoxResult(randomRestaurant);
+            });
+            
+            // 点击外部关闭
+            modal.addEventListener('click', (e) => {
+                if (e.target === modal) {
+                    modal.remove();
+                }
+            });
+        }
+        
+        // 显示盲盒结果
+        function showBlindBoxResult(restaurant) {
+            const modal = document.createElement('div');
+            modal.className = 'detail-modal active';
+            modal.innerHTML = `
+                <div class="detail-content">
+                    <div class="detail-header">
+                        <h3>� 盲盒结果</h3>
+                        <button class="close-btn">✕</button>
+                    </div>
+                    <div class="detail-body">
+                        <div class="blind-box-result">
+                            <div class="result-image">
+                                <img src="${restaurant.image}" alt="${restaurant.name}">
+                            </div>
+                            <div class="result-info">
+                                <h4 class="result-name">${restaurant.name}</h4>
+                                <div class="result-basic">
+                                    <span class="result-type ${restaurant.shop_type === '门店' ? 'store' : 'stall'}">${restaurant.shop_type}</span>
+                                    <span class="result-price">¥${restaurant.avg_price}/人</span>
+                                    <span class="result-score">${restaurant.score}分</span>
+                                </div>
+                                <div class="result-cuisine">${restaurant.cuisine}</div>
+                                <div class="result-tags">
+                                    ${restaurant.tags.map(tag => `<span class="tag">${tag}</span>`).join('')}
+                                </div>
+                                <div class="result-location">
+                                    📍 ${restaurant.location_desc} · ${getRestaurantDistance(restaurant)}
+                                </div>
+                            </div>
+                            <div class="result-actions">
+                                <button class="result-btn view-btn" data-shop-id="${restaurant.shop_id}">查看详情</button>
+                                <button class="result-btn another-btn">再抽一次</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            `;
+            document.body.appendChild(modal);
+            
+            // 关闭按钮
+            modal.querySelector('.close-btn').addEventListener('click', () => {
+                modal.remove();
+            });
+            
+            // 查看详情
+            modal.querySelector('.view-btn').addEventListener('click', () => {
+                addBrowsingHistory(restaurant);
+                showRestaurantDetail(restaurant);
+                modal.remove();
+            });
+            
+            // 再抽一次
+            modal.querySelector('.another-btn').addEventListener('click', () => {
+                modal.remove();
+                showBlindBoxOptions();
+            });
+            
+            // 点击外部关闭
+            modal.addEventListener('click', (e) => {
+                if (e.target === modal) {
+                    modal.remove();
+                }
+            });
+        }
+        
+        // 模拟菜单数据
+        const mockMenus = {
+            1: [
+                { name: '东北饺子', price: 18 },
+                { name: '锅包肉', price: 32 },
+                { name: '地三鲜', price: 22 },
+                { name: '酸菜炖排骨', price: 38 }
+            ],
+            2: [
+                { name: '煎饼果子', price: 8 },
+                { name: '手抓饼', price: 6 },
+                { name: '豆浆', price: 3 },
+                { name: '油条', price: 2 }
+            ],
+            3: [
+                { name: '麻婆豆腐', price: 20 },
+                { name: '水煮鱼', price: 48 },
+                { name: '宫保鸡丁', price: 28 },
+                { name: '回锅肉', price: 32 }
+            ],
+            4: [
+                { name: '珍珠奶茶', price: 15 },
+                { name: '水果茶', price: 18 },
+                { name: '奶盖茶', price: 20 },
+                { name: '气泡水', price: 12 }
+            ],
+            5: [
+                { name: '羊肉串', price: 3 },
+                { name: '烤鸡翅', price: 8 },
+                { name: '烤韭菜', price: 10 },
+                { name: '烤茄子', price: 12 }
+            ],
+            6: [
+                { name: '汉堡', price: 15 },
+                { name: '薯条', price: 8 },
+                { name: '可乐', price: 5 },
+                { name: '鸡肉卷', price: 12 }
+            ],
+            7: [
+                { name: '苹果', price: 10 },
+                { name: '香蕉', price: 8 },
+                { name: '橙子', price: 12 },
+                { name: '西瓜', price: 15 }
+            ],
+            8: [
+                { name: '三文鱼刺身', price: 68 },
+                { name: '寿司拼盘', price: 48 },
+                { name: '拉面', price: 32 },
+                { name: '天妇罗', price: 28 }
+            ],
+            9: [
+                { name: '麻辣烫', price: 18 },
+                { name: '冒菜', price: 22 },
+                { name: '酸辣粉', price: 12 },
+                { name: '米线', price: 15 }
+            ],
+            10: [
+                { name: '生日蛋糕', price: 88 },
+                { name: ' cupcakes', price: 35 },
+                { name: '提拉米苏', price: 28 },
+                { name: '芝士蛋糕', price: 32 }
+            ]
+        };
+        
+        // 模拟评价数据
+        const mockReviews = {
+            1: [
+                { user: '北大校友', content: '饺子皮薄馅大，味道正宗，推荐！' },
+                { user: '清华同学', content: '锅包肉外酥里嫩，酸甜可口，非常好吃。' }
+            ],
+            2: [
+                { user: '早八人', content: '出餐速度快，味道好，适合赶时间的早八人。' },
+                { user: '常客', content: '煎饼果子分量足，酱料调得很好。' }
+            ],
+            3: [
+                { user: '团建组织者', content: '适合多人聚餐，菜品丰富，味道正宗。' },
+                { user: '川菜爱好者', content: '辣味十足，非常过瘾，推荐水煮鱼。' }
+            ],
+            4: [
+                { user: '奶茶控', content: '奶茶甜度适中，珍珠Q弹，值得尝试。' },
+                { user: '自习党', content: '环境安静，适合学习时来一杯。' }
+            ],
+            5: [
+                { user: '夜猫子', content: '深夜食堂的好去处，烧烤味道很棒。' },
+                { user: '聚会常客', content: '适合朋友聚会，氛围好，价格实惠。' }
+            ],
+            6: [
+                { user: '单人食', content: '适合一个人吃，出餐快，价格实惠。' },
+                { user: '赶时间', content: '快速解决温饱的好选择，味道不错。' }
+            ],
+            7: [
+                { user: '健康达人', content: '水果新鲜，价格合理，经常来买。' },
+                { user: '减肥党', content: '种类丰富，新鲜度高，适合健康饮食。' }
+            ],
+            8: [
+                { user: '日料爱好者', content: '食材新鲜，味道正宗，环境优雅。' },
+                { user: '情侣约会', content: '适合约会，氛围浪漫，菜品精致。' }
+            ],
+            9: [
+                { user: '辣食爱好者', content: '味道正宗，自选食材，非常方便。' },
+                { user: '深夜党', content: '深夜外卖的好选择，配送速度快。' }
+            ],
+            10: [
+                { user: '甜品控', content: '蛋糕口感细腻，甜度适中，非常好吃。' },
+                { user: '生日聚会', content: '生日蛋糕做得很漂亮，味道也很好。' }
+            ]
+        };
+        
+        // 渲染商户卡片
+        function renderRestaurants() {
+            const restaurantList = document.getElementById('restaurant-list');
+            restaurantList.innerHTML = '';
+            
+            mockRestaurants.forEach(restaurant => {
+                const card = document.createElement('div');
+                card.className = 'restaurant-card';
+                card.innerHTML = `
+                    <div class="card-image">
+                        <img src="${restaurant.image}" alt="${restaurant.name}">
+                        <button class="favorite-btn-card ${isFavorite(restaurant.shop_id) ? 'favorited' : ''}" data-shop-id="${restaurant.shop_id}">
+                            ${isFavorite(restaurant.shop_id) ? '❤️' : '🤍'}
+                        </button>
+                    </div>
+                    <div class="card-header">
+                        <h4>${restaurant.name}</h4>
+                        <span class="shop-type-badge ${restaurant.shop_type === '门店' ? 'store' : 'stall'}">
+                            ${restaurant.shop_type}
+                        </span>
+                    </div>
+                    <div class="card-info">
+                        <span class="price">¥${restaurant.avg_price}/人</span>
+                        <span class="cuisine">${restaurant.cuisine}</span>
+                        <span class="score">${restaurant.score}分</span>
+                    </div>
+                    <div class="card-tags">
+                        ${restaurant.tags.map(tag => `<span class="tag">${tag}</span>`).join('')}
+                    </div>
+                    <div class="card-location">
+                        📍 ${restaurant.location_desc}
+                        <span class="card-distance">${getRestaurantDistance(restaurant)}</span>
+                    </div>
+                `;
+                
+                // 添加点击事件
+                card.addEventListener('click', (e) => {
+                    // 如果点击的是收藏按钮，不触发详情页
+                    if (!e.target.closest('.favorite-btn-card')) {
+                        addBrowsingHistory(restaurant);
+                        showRestaurantDetail(restaurant);
+                    }
+                });
+                
+                // 收藏按钮点击事件
+                const favoriteBtn = card.querySelector('.favorite-btn-card');
+                favoriteBtn.addEventListener('click', (e) => {
+                    e.stopPropagation(); // 阻止冒泡
+                    const shopId = parseInt(favoriteBtn.dataset.shopId);
+                    toggleFavorite(shopId);
+                    // 更新按钮状态
+                    if (isFavorite(shopId)) {
+                        favoriteBtn.classList.add('favorited');
+                        favoriteBtn.textContent = '❤️';
+                    } else {
+                        favoriteBtn.classList.remove('favorited');
+                        favoriteBtn.textContent = '🤍';
+                    }
+                });
+                
+                restaurantList.appendChild(card);
+            });
+        }
+        
+        // 显示商户详情
+        function showRestaurantDetail(restaurant) {
+            const detailModal = document.getElementById('restaurant-detail');
+            const detailName = document.getElementById('detail-name');
+            const detailPrice = document.querySelector('.detail-price');
+            const detailCuisine = document.querySelector('.detail-cuisine');
+            const detailScore = document.querySelector('.detail-score');
+            const detailType = document.querySelector('.detail-type');
+            const detailLocation = document.getElementById('detail-location');
+            const detailTags = document.querySelector('.detail-tags');
+            const menuItems = document.querySelector('.menu-items');
+            const reviewItems = document.querySelector('.review-items');
+            const detailImage = document.querySelector('.detail-image');
+            
+            // 填充基本信息
+            detailName.textContent = restaurant.name;
+            detailPrice.textContent = `¥${restaurant.avg_price}/人`;
+            detailCuisine.textContent = restaurant.cuisine;
+            detailScore.textContent = `${restaurant.score}分`;
+            detailType.textContent = restaurant.shop_type;
+            detailType.className = `detail-type ${restaurant.shop_type === '门店' ? 'store' : 'stall'}`;
+            detailLocation.textContent = restaurant.location_desc;
+            
+            // 填充图片
+            detailImage.innerHTML = `<img src="${restaurant.image}" alt="${restaurant.name}" style="width: 100%; height: 100%; object-fit: cover;">`;
+            
+            // 填充标签
+            detailTags.innerHTML = '';
+            restaurant.tags.forEach(tag => {
+                const tagElement = document.createElement('span');
+                tagElement.className = 'tag';
+                tagElement.textContent = tag;
+                detailTags.appendChild(tagElement);
+            });
+            
+            // 填充菜单
+            menuItems.innerHTML = '';
+            const menus = mockMenus[restaurant.shop_id] || [];
+            menus.forEach(menu => {
+                const menuItem = document.createElement('div');
+                menuItem.className = 'menu-item';
+                menuItem.innerHTML = `
+                    <span class="menu-item-name">${menu.name}</span>
+                    <span class="menu-item-price">¥${menu.price}</span>
+                `;
+                menuItems.appendChild(menuItem);
+            });
+            
+            // 填充评价
+            reviewItems.innerHTML = '';
+            const reviews = mockReviews[restaurant.shop_id] || [];
+            reviews.forEach(review => {
+                const reviewItem = document.createElement('div');
+                reviewItem.className = 'review-item';
+                reviewItem.innerHTML = `
+                    <div class="review-user">${review.user}</div>
+                    <div class="review-content">${review.content}</div>
+                `;
+                reviewItems.appendChild(reviewItem);
+            });
+            
+            // 显示弹窗
+            detailModal.classList.add('active');
+            
+            // 初始化收藏按钮
+            const favoriteBtn = detailModal.querySelector('.favorite-btn');
+            if (isFavorite(restaurant.shop_id)) {
+                favoriteBtn.textContent = '❤️ 已收藏';
+                favoriteBtn.style.backgroundColor = '#ff6b6b';
+                favoriteBtn.style.color = 'white';
+            } else {
+                favoriteBtn.textContent = '🤍 收藏';
+                favoriteBtn.style.backgroundColor = '#f0f0f0';
+                favoriteBtn.style.color = '#333';
+            }
+            
+            // 收藏按钮点击事件
+            favoriteBtn.addEventListener('click', () => {
+                toggleFavorite(restaurant.shop_id);
+                if (isFavorite(restaurant.shop_id)) {
+                    favoriteBtn.textContent = '❤️ 已收藏';
+                    favoriteBtn.style.backgroundColor = '#ff6b6b';
+                    favoriteBtn.style.color = 'white';
+                } else {
+                    favoriteBtn.textContent = '🤍 收藏';
+                    favoriteBtn.style.backgroundColor = '#f0f0f0';
+                    favoriteBtn.style.color = '#333';
+                }
+            });
+            
+            // 评分星星点击事件
+            const stars = detailModal.querySelectorAll('.star');
+            const ratingInput = detailModal.querySelector('#review-rating');
+            
+            stars.forEach(star => {
+                star.addEventListener('click', () => {
+                    const rating = parseInt(star.dataset.rating);
+                    ratingInput.value = rating;
+                    
+                    // 更新星星状态
+                    stars.forEach(s => s.classList.remove('active'));
+                    for (let i = 0; i < rating; i++) {
+                        stars[i].classList.add('active');
+                    }
+                });
+            });
+            
+            // 初始化评分星星
+            const initialRating = parseInt(ratingInput.value);
+            for (let i = 0; i < initialRating; i++) {
+                stars[i].classList.add('active');
+            }
+            
+            // 评价表单提交事件
+            const submitReviewBtn = detailModal.querySelector('#submit-review');
+            const reviewContent = detailModal.querySelector('#review-content');
+            
+            submitReviewBtn.addEventListener('click', () => {
+                const content = reviewContent.value.trim();
+                const rating = parseInt(ratingInput.value);
+                
+                if (!content) {
+                    alert('请输入评价内容');
+                    return;
+                }
+                
+                if (!userToken) {
+                    alert('请先登录');
+                    return;
+                }
+                
+                // 创建评价对象
+                const review = {
+                    review_id: Date.now(),
+                    user_id: userInfo ? (userInfo.nickname || '用户') : '用户',
+                    shop_id: restaurant.shop_id,
+                    content: content,
+                    rating: rating,
+                    timestamp: new Date().toISOString()
+                };
+                
+                // 保存评价
+                reviews.push(review);
+                localStorage.setItem('reviews', JSON.stringify(reviews));
+                
+                // 计算并更新商户均分
+                updateRestaurantScore(restaurant.shop_id);
+                
+                // 刷新评价列表
+                reviewItems.innerHTML = '';
+                const allReviews = [...(mockReviews[restaurant.shop_id] || []), ...reviews.filter(r => r.shop_id === restaurant.shop_id)];
+                allReviews.forEach(review => {
+                    const reviewItem = document.createElement('div');
+                    reviewItem.className = 'review-item';
+                    reviewItem.innerHTML = `
+                        <div class="review-header">
+                            <div class="review-user">${review.user || review.user_id}</div>
+                            ${review.rating ? `<div class="review-rating-stars">${'★'.repeat(review.rating)}${'☆'.repeat(5 - review.rating)}</div>` : ''}
+                        </div>
+                        <div class="review-content">${review.content}</div>
+                    `;
+                    reviewItems.appendChild(reviewItem);
+                });
+                
+                // 清空评价表单
+                reviewContent.value = '';
+                ratingInput.value = '5';
+                stars.forEach(s => s.classList.remove('active'));
+                for (let i = 0; i < 5; i++) {
+                    stars[i].classList.add('active');
+                }
+                
+                alert('评价发布成功！');
+            });
+        }
+        
+        // 关闭详情弹窗
+        document.getElementById('close-detail').addEventListener('click', () => {
+            const detailModal = document.getElementById('restaurant-detail');
+            detailModal.classList.remove('active');
+        });
+        
+        // 点击弹窗外部关闭
+        document.getElementById('restaurant-detail').addEventListener('click', (e) => {
+            if (e.target === document.getElementById('restaurant-detail')) {
+                document.getElementById('restaurant-detail').classList.remove('active');
+            }
+        });
+        
+        // 认证页面逻辑
+        function initAuthPage() {
+            // 登录按钮
+            document.getElementById('login-btn').addEventListener('click', () => {
+                const phone = document.getElementById('phone').value;
+                const code = document.getElementById('code').value;
+                
+                if (!phone || !code) {
+                    alert('请输入手机号和验证码');
+                    return;
+                }
+                
+                // 模拟登录成功
+                userToken = 'mock-token-' + Date.now();
+                userInfo = {
+                    nickname: '学生用户',
+                    avatar: '👤',
+                    edu_status: '未认证',
+                    school_name: ''
+                };
+                
+                localStorage.setItem('userToken', userToken);
+                localStorage.setItem('userInfo', JSON.stringify(userInfo));
+                
+                // 显示认证表单
+                document.querySelector('.auth-form').style.display = 'none';
+                document.querySelector('.verification-form').style.display = 'block';
+            });
+            
+            // 微信登录
+            document.querySelector('.wechat-btn').addEventListener('click', () => {
+                // 模拟微信登录成功
+                userToken = 'wechat-token-' + Date.now();
+                userInfo = {
+                    nickname: '微信用户',
+                    avatar: '👤',
+                    edu_status: '未认证',
+                    school_name: ''
+                };
+                
+                localStorage.setItem('userToken', userToken);
+                localStorage.setItem('userInfo', JSON.stringify(userInfo));
+                
+                // 显示认证表单
+                document.querySelector('.auth-form').style.display = 'none';
+                document.querySelector('.verification-form').style.display = 'block';
+            });
+            
+            // 认证方式切换
+            document.querySelectorAll('input[name="auth-type"]').forEach(radio => {
+                radio.addEventListener('change', () => {
+                    const authType = radio.value;
+                    if (authType === 'id-card') {
+                        document.getElementById('id-card-upload').style.display = 'block';
+                        document.getElementById('edu-email-form').style.display = 'none';
+                    } else {
+                        document.getElementById('id-card-upload').style.display = 'none';
+                        document.getElementById('edu-email-form').style.display = 'block';
+                    }
+                });
+            });
+            
+            // 提交认证
+            document.getElementById('verify-btn').addEventListener('click', () => {
+                const school = document.getElementById('school').value;
+                if (!school) {
+                    alert('请选择所属高校');
+                    return;
+                }
+                
+                // 模拟认证提交
+                userInfo.edu_status = '审核中';
+                userInfo.school_name = document.getElementById('school').options[document.getElementById('school').selectedIndex].text;
+                localStorage.setItem('userInfo', JSON.stringify(userInfo));
+                
+                alert('认证申请已提交，正在审核中，预计24小时通过');
+                
+                // 跳转到推荐页
+                showPage('recommend');
+                tabItems.forEach(item => item.classList.remove('active'));
+                document.querySelector('[data-page="recommend"]').classList.add('active');
+                renderRestaurants();
+            });
+            
+            // 退出登录
+            document.getElementById('logout-btn').addEventListener('click', () => {
+                if (confirm('确定要退出登录吗？')) {
+                    localStorage.removeItem('userToken');
+                    localStorage.removeItem('userInfo');
+                    userToken = null;
+                    userInfo = null;
+                    showPage('auth');
+                }
+            });
+            
+            // 个人中心功能项点击事件
+            document.querySelector('.user-profile').addEventListener('click', () => {
+                if (!userToken) {
+                    showPage('auth');
+                }
+            });
+            
+            // 浏览记录
+            document.querySelectorAll('.feature-item')[0].addEventListener('click', () => {
+                if (userToken) {
+                    showBrowsingHistory();
+                } else {
+                    showPage('auth');
+                }
+            });
+            
+            // 我的收藏
+            document.querySelectorAll('.feature-item')[1].addEventListener('click', () => {
+                if (userToken) {
+                    showFavorites();
+                } else {
+                    showPage('auth');
+                }
+            });
+            
+            // 我的评价
+            document.querySelectorAll('.feature-item')[2].addEventListener('click', () => {
+                if (userToken) {
+                    showMyReviews();
+                } else {
+                    showPage('auth');
+                }
+            });
+        }
+        
+        // 更新用户信息显示
+        function updateUserInfo() {
+            if (userInfo) {
+                document.getElementById('user-name').textContent = userInfo.nickname;
+                if (userInfo.edu_status === '已认证') {
+                    document.getElementById('user-school').textContent = userInfo.school_name;
+                    document.getElementById('verified-badge').style.display = 'block';
+                } else if (userInfo.edu_status === '审核中') {
+                    document.getElementById('user-school').textContent = userInfo.school_name + ' (审核中)';
+                } else {
+                    document.getElementById('user-school').textContent = '点击登录并认证学籍';
+                }
+            }
+        }
+        
+        // 搜索功能
+        function initSearch() {
+            const searchBtn = document.querySelector('.search-btn');
+            const searchInput = document.querySelector('.search-input');
+            
+            // 搜索按钮点击事件
+            searchBtn.addEventListener('click', () => {
+                performSearch();
+            });
+            
+            // 回车键搜索
+            searchInput.addEventListener('keypress', (e) => {
+                if (e.key === 'Enter') {
+                    performSearch();
+                }
+            });
+            
+            // 输入框清除按钮
+            searchInput.addEventListener('input', () => {
+                if (searchInput.value === '') {
+                    // 当输入框为空时，显示所有商户
+                    renderRestaurants();
+                }
+            });
+        }
+        
+        // 执行搜索
+        function performSearch() {
+            const searchInput = document.querySelector('.search-input');
+            const keyword = searchInput.value.trim().toLowerCase();
+            
+            if (!keyword) {
+                // 空关键词时显示所有商户
+                renderRestaurants();
+                return;
+            }
+            
+            // 过滤商户
+            const filteredRestaurants = mockRestaurants.filter(restaurant => {
+                return (
+                    restaurant.name.toLowerCase().includes(keyword) ||
+                    restaurant.cuisine.toLowerCase().includes(keyword) ||
+                    restaurant.tags.some(tag => tag.toLowerCase().includes(keyword))
+                );
+            });
+            
+            // 显示搜索结果
+            const restaurantList = document.getElementById('restaurant-list');
+            restaurantList.innerHTML = '';
+            
+            // 添加返回按钮
+            const backButton = document.createElement('div');
+            backButton.innerHTML = `
+                <div style="display: flex; align-items: center; padding: 12px; background-color: white; border-radius: 8px; margin-bottom: 12px; cursor: pointer;">
+                    <span>←</span>
+                    <span style="margin-left: 8px;">返回全部商户</span>
+                </div>
+            `;
+            backButton.addEventListener('click', () => {
+                searchInput.value = '';
+                renderRestaurants();
+            });
+            restaurantList.appendChild(backButton);
+            
+            if (filteredRestaurants.length === 0) {
+                restaurantList.innerHTML += '<div style="text-align: center; padding: 40px; color: #999;">未找到相关商户</div>';
+                return;
+            }
+            
+            filteredRestaurants.forEach(restaurant => {
+                const card = document.createElement('div');
+                card.className = 'restaurant-card';
+                card.innerHTML = `
+                    <div class="card-image">
+                        <img src="${restaurant.image}" alt="${restaurant.name}">
+                        <button class="favorite-btn-card ${isFavorite(restaurant.shop_id) ? 'favorited' : ''}" data-shop-id="${restaurant.shop_id}">
+                            ${isFavorite(restaurant.shop_id) ? '❤️' : '🤍'}
+                        </button>
+                    </div>
+                    <div class="card-header">
+                        <h4>${restaurant.name}</h4>
+                        <span class="shop-type-badge ${restaurant.shop_type === '门店' ? 'store' : 'stall'}">
+                            ${restaurant.shop_type}
+                        </span>
+                    </div>
+                    <div class="card-info">
+                        <span class="price">¥${restaurant.avg_price}/人</span>
+                        <span class="cuisine">${restaurant.cuisine}</span>
+                        <span class="score">${restaurant.score}分</span>
+                    </div>
+                    <div class="card-tags">
+                        ${restaurant.tags.map(tag => `<span class="tag">${tag}</span>`).join('')}
+                    </div>
+                    <div class="card-location">
+                        📍 ${restaurant.location_desc}
+                        <span class="card-distance">${getRestaurantDistance(restaurant)}</span>
+                    </div>
+                `;
+                
+                // 添加点击事件
+                card.addEventListener('click', (e) => {
+                    // 如果点击的是收藏按钮，不触发详情页
+                    if (!e.target.closest('.favorite-btn-card')) {
+                        addBrowsingHistory(restaurant);
+                        showRestaurantDetail(restaurant);
+                    }
+                });
+                
+                // 收藏按钮点击事件
+                const favoriteBtn = card.querySelector('.favorite-btn-card');
+                favoriteBtn.addEventListener('click', (e) => {
+                    e.stopPropagation(); // 阻止冒泡
+                    const shopId = parseInt(favoriteBtn.dataset.shopId);
+                    toggleFavorite(shopId);
+                    // 更新按钮状态
+                    if (isFavorite(shopId)) {
+                        favoriteBtn.classList.add('favorited');
+                        favoriteBtn.textContent = '❤️';
+                    } else {
+                        favoriteBtn.classList.remove('favorited');
+                        favoriteBtn.textContent = '🤍';
+                    }
+                });
+                
+                restaurantList.appendChild(card);
+            });
+        }
+        
+        // 显示浏览记录
+        function showBrowsingHistory() {
+            // 创建浏览记录页面
+            const modal = document.createElement('div');
+            modal.className = 'detail-modal active';
+            modal.innerHTML = `
+                <div class="detail-content">
+                    <div class="detail-header">
+                        <h3>浏览记录</h3>
+                        <button class="close-btn">✕</button>
+                    </div>
+                    <div class="detail-body">
+                        <div id="history-list" style="padding: 0;">
+                            <!-- 浏览记录将动态生成 -->
+                        </div>
+                    </div>
+                </div>
+            `;
+            document.body.appendChild(modal);
+            
+            // 填充浏览记录
+            const historyList = modal.querySelector('#history-list');
+            if (browsingHistory.length === 0) {
+                historyList.innerHTML = '<div style="text-align: center; padding: 40px; color: #999;">暂无浏览记录</div>';
+            } else {
+                browsingHistory.forEach(restaurant => {
+                    const card = document.createElement('div');
+                    card.className = 'restaurant-card';
+                    card.innerHTML = `
+                        <div class="card-image">
+                            <img src="${restaurant.image}" alt="${restaurant.name}">
+                            <button class="favorite-btn-card ${isFavorite(restaurant.shop_id) ? 'favorited' : ''}" data-shop-id="${restaurant.shop_id}">
+                                ${isFavorite(restaurant.shop_id) ? '❤️' : '🤍'}
+                            </button>
+                        </div>
+                        <div class="card-header">
+                            <h4>${restaurant.name}</h4>
+                            <span class="shop-type-badge ${restaurant.shop_type === '门店' ? 'store' : 'stall'}">
+                                ${restaurant.shop_type}
+                            </span>
+                        </div>
+                        <div class="card-info">
+                            <span class="price">¥${restaurant.avg_price}/人</span>
+                            <span class="cuisine">${restaurant.cuisine}</span>
+                            <span class="score">${restaurant.score}分</span>
+                        </div>
+                        <div class="card-tags">
+                            ${restaurant.tags.map(tag => `<span class="tag">${tag}</span>`).join('')}
+                        </div>
+                        <div class="card-location">
+                            📍 ${restaurant.location_desc}
+                        </div>
+                    `;
+                    
+                    // 添加点击事件
+                    card.addEventListener('click', (e) => {
+                        // 如果点击的是收藏按钮，不触发详情页
+                        if (!e.target.closest('.favorite-btn-card')) {
+                            addBrowsingHistory(restaurant);
+                            showRestaurantDetail(restaurant);
+                            modal.remove();
+                        }
+                    });
+                    
+                    // 收藏按钮点击事件
+                    const favoriteBtn = card.querySelector('.favorite-btn-card');
+                    favoriteBtn.addEventListener('click', (e) => {
+                        e.stopPropagation(); // 阻止冒泡
+                        const shopId = parseInt(favoriteBtn.dataset.shopId);
+                        toggleFavorite(shopId);
+                        // 更新按钮状态
+                        if (isFavorite(shopId)) {
+                            favoriteBtn.classList.add('favorited');
+                            favoriteBtn.textContent = '❤️';
+                        } else {
+                            favoriteBtn.classList.remove('favorited');
+                            favoriteBtn.textContent = '🤍';
+                        }
+                    });
+                    
+                    historyList.appendChild(card);
+                });
+            }
+            
+            // 关闭按钮
+            modal.querySelector('.close-btn').addEventListener('click', () => {
+                modal.remove();
+            });
+            
+            // 点击外部关闭
+            modal.addEventListener('click', (e) => {
+                if (e.target === modal) {
+                    modal.remove();
+                }
+            });
+        }
+        
+        // 显示我的收藏
+        function showFavorites() {
+            // 获取收藏的商户
+            const favoriteRestaurants = mockRestaurants.filter(restaurant => {
+                return favorites.includes(restaurant.shop_id);
+            });
+            
+            // 创建收藏页面
+            const modal = document.createElement('div');
+            modal.className = 'detail-modal active';
+            modal.innerHTML = `
+                <div class="detail-content">
+                    <div class="detail-header">
+                        <h3>我的收藏</h3>
+                        <button class="close-btn">✕</button>
+                    </div>
+                    <div class="detail-body">
+                        <div id="favorite-list" style="padding: 0;">
+                            <!-- 收藏商户将动态生成 -->
+                        </div>
+                    </div>
+                </div>
+            `;
+            document.body.appendChild(modal);
+            
+            // 填充收藏商户
+            const favoriteList = modal.querySelector('#favorite-list');
+            if (favoriteRestaurants.length === 0) {
+                favoriteList.innerHTML = '<div style="text-align: center; padding: 40px; color: #999;">暂无收藏商户</div>';
+            } else {
+                favoriteRestaurants.forEach(restaurant => {
+                    const card = document.createElement('div');
+                    card.className = 'restaurant-card';
+                    card.innerHTML = `
+                        <div class="card-image">
+                            <img src="${restaurant.image}" alt="${restaurant.name}">
+                            <button class="favorite-btn-card ${isFavorite(restaurant.shop_id) ? 'favorited' : ''}" data-shop-id="${restaurant.shop_id}">
+                                ${isFavorite(restaurant.shop_id) ? '❤️' : '🤍'}
+                            </button>
+                        </div>
+                        <div class="card-header">
+                            <h4>${restaurant.name}</h4>
+                            <span class="shop-type-badge ${restaurant.shop_type === '门店' ? 'store' : 'stall'}">
+                                ${restaurant.shop_type}
+                            </span>
+                        </div>
+                        <div class="card-info">
+                            <span class="price">¥${restaurant.avg_price}/人</span>
+                            <span class="cuisine">${restaurant.cuisine}</span>
+                            <span class="score">${restaurant.score}分</span>
+                        </div>
+                        <div class="card-tags">
+                            ${restaurant.tags.map(tag => `<span class="tag">${tag}</span>`).join('')}
+                        </div>
+                        <div class="card-location">
+                            📍 ${restaurant.location_desc}
+                        </div>
+                    `;
+                    
+                    // 添加点击事件
+                    card.addEventListener('click', (e) => {
+                        // 如果点击的是收藏按钮，不触发详情页
+                        if (!e.target.closest('.favorite-btn-card')) {
+                            addBrowsingHistory(restaurant);
+                            showRestaurantDetail(restaurant);
+                            modal.remove();
+                        }
+                    });
+                    
+                    // 收藏按钮点击事件
+                    const favoriteBtn = card.querySelector('.favorite-btn-card');
+                    favoriteBtn.addEventListener('click', (e) => {
+                        e.stopPropagation(); // 阻止冒泡
+                        const shopId = parseInt(favoriteBtn.dataset.shopId);
+                        toggleFavorite(shopId);
+                        // 更新按钮状态
+                        if (isFavorite(shopId)) {
+                            favoriteBtn.classList.add('favorited');
+                            favoriteBtn.textContent = '❤️';
+                        } else {
+                            favoriteBtn.classList.remove('favorited');
+                            favoriteBtn.textContent = '🤍';
+                        }
+                        // 如果取消收藏，从列表中移除
+                        if (!isFavorite(shopId)) {
+                            card.remove();
+                            if (favoriteList.children.length === 0) {
+                                favoriteList.innerHTML = '<div style="text-align: center; padding: 40px; color: #999;">暂无收藏商户</div>';
+                            }
+                        }
+                    });
+                    
+                    favoriteList.appendChild(card);
+                });
+            }
+            
+            // 关闭按钮
+            modal.querySelector('.close-btn').addEventListener('click', () => {
+                modal.remove();
+            });
+            
+            // 点击外部关闭
+            modal.addEventListener('click', (e) => {
+                if (e.target === modal) {
+                    modal.remove();
+                }
+            });
+        }
+        
+        // 计算并更新商户均分
+        function updateRestaurantScore(shopId) {
+            // 获取该商户的所有评价
+            const shopReviews = reviews.filter(review => review.shop_id === shopId && review.rating);
+            
+            if (shopReviews.length > 0) {
+                // 计算平均分
+                const totalRating = shopReviews.reduce((sum, review) => sum + review.rating, 0);
+                const avgRating = (totalRating / shopReviews.length).toFixed(1);
+                
+                // 更新商户的评分
+                const restaurant = mockRestaurants.find(r => r.shop_id === shopId);
+                if (restaurant) {
+                    restaurant.score = parseFloat(avgRating);
+                }
+            }
+        }
+        
+        // 显示我的评价
+        function showMyReviews() {
+            // 获取当前用户的评价
+            const currentUserId = userInfo ? (userInfo.nickname || '用户') : '用户';
+            const userReviews = reviews.filter(review => {
+                return review.user_id === currentUserId;
+            });
+            
+            // 创建我的评价页面
+            const modal = document.createElement('div');
+            modal.className = 'detail-modal active';
+            modal.innerHTML = `
+                <div class="detail-content">
+                    <div class="detail-header">
+                        <h3>我的评价</h3>
+                        <button class="close-btn">✕</button>
+                    </div>
+                    <div class="detail-body">
+                        <div id="my-reviews-list" style="padding: 0;">
+                            <!-- 我的评价将动态生成 -->
+                        </div>
+                    </div>
+                </div>
+            `;
+            document.body.appendChild(modal);
+            
+            // 填充我的评价
+            const myReviewsList = modal.querySelector('#my-reviews-list');
+            if (userReviews.length === 0) {
+                myReviewsList.innerHTML = '<div style="text-align: center; padding: 40px; color: #999;">暂无评价</div>';
+            } else {
+                userReviews.forEach(review => {
+                    // 找到对应的商户信息
+                    const restaurant = mockRestaurants.find(r => r.shop_id === review.shop_id);
+                    if (!restaurant) return;
+                    
+                    const reviewItem = document.createElement('div');
+                    reviewItem.className = 'review-card';
+                    reviewItem.innerHTML = `
+                        <div class="review-card-header">
+                            <div class="review-restaurant">
+                                <h4>${restaurant.name}</h4>
+                                <div class="review-meta">
+                                    <span class="review-date">${new Date(review.timestamp).toLocaleString()}</span>
+                                    ${review.rating ? `<span class="review-card-rating">${'★'.repeat(review.rating)}${'☆'.repeat(5 - review.rating)}</span>` : ''}
+                                </div>
+                            </div>
+                            <button class="delete-review-btn" data-review-id="${review.review_id}">🗑️</button>
+                        </div>
+                        <div class="review-card-content">
+                            ${review.content}
+                        </div>
+                    `;
+                    
+                    // 删除评价按钮
+                    const deleteBtn = reviewItem.querySelector('.delete-review-btn');
+                    deleteBtn.addEventListener('click', (e) => {
+                        e.stopPropagation();
+                        if (confirm('确定要删除这条评价吗？')) {
+                            const reviewId = parseInt(deleteBtn.dataset.reviewId);
+                            reviews = reviews.filter(r => r.review_id !== reviewId);
+                            localStorage.setItem('reviews', JSON.stringify(reviews));
+                            reviewItem.remove();
+                            if (myReviewsList.children.length === 0) {
+                                myReviewsList.innerHTML = '<div style="text-align: center; padding: 40px; color: #999;">暂无评价</div>';
+                            }
+                        }
+                    });
+                    
+                    // 点击评价查看商户详情
+                    reviewItem.addEventListener('click', (e) => {
+                        if (!e.target.closest('.delete-review-btn')) {
+                            addBrowsingHistory(restaurant);
+                            showRestaurantDetail(restaurant);
+                            modal.remove();
+                        }
+                    });
+                    
+                    myReviewsList.appendChild(reviewItem);
+                });
+            }
+            
+            // 关闭按钮
+            modal.querySelector('.close-btn').addEventListener('click', () => {
+                modal.remove();
+            });
+            
+            // 点击外部关闭
+            modal.addEventListener('click', (e) => {
+                if (e.target === modal) {
+                    modal.remove();
+                }
+            });
+        }
+        
+        // 页面加载时初始化
+        window.onload = function() {
+            initAuthPage();
+            initSearch();
+            
+            // 获取用户位置
+            getUserLocation();
+            
+            // 检查登录状态
+            if (userToken) {
+                updateUserInfo();
+                showPage('recommend');
+                renderRestaurants();
+            } else {
+                showPage('auth');
+            }
+        };
+    </script>
+</body>
+</html>
